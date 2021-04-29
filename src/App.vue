@@ -7,13 +7,16 @@
     </div>
     <div class="container">
         <div class="row">
-            <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" style="width:14.2857%"><h3>{{ day }}</h3></div>
-            <div :style="'width: ' + (offset_days*14.2857) + '%'"></div>
-            <div v-for="forecast in forecasts" style="width:14.2857%">
+            <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" class="col"><h3>{{ day }}</h3></div>
+        </div>
+        <div class="row" v-for="week in weeks">
+            <div v-for="index in week.offset_days" class="col"></div>
+            <div v-for="forecast in week.forecasts" class="col">
                 <h5 :style="(forecast.easterly ? 'color:green' : '')">{{ forecast.date }}</h5>
                 <p>Departures: {{ forecast.runways.departures[0] }}/{{ forecast.runways.departures[1] }}</p>
                 <p>Arrivals: {{ forecast.runways.arrivals[0] }}/{{ forecast.runways.arrivals[1] }}</p>
             </div>
+            <div v-for="index in week.offset_days_post" class="col"></div>
         </div>
     </div>
     <div class="container">
@@ -38,7 +41,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import 'bootstrap/dist/css/bootstrap.min.css'
 export default {
@@ -47,10 +49,9 @@ export default {
   },
   data: function() {
       return {
-        forecasts: [],
-        current: {departure: {}, arrival: {}},
-        offset_days: 0
-      }
+        weeks: [{forecasts:[],offset_days:0,offset_days_post:0}],
+        current: {departure: {}, arrival: {}}
+     }
   },
   mounted() {
         Date.prototype.getWeekNumber = function(){
@@ -66,9 +67,12 @@ export default {
         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
         let offsetMap = [6, 0, 1, 2, 3, 4, 5];
-        this.offset_days = offsetMap[new Date(data.data[0].datetime).getDay()]
+        this.weeks[0].offset_days = offsetMap[new Date(data.data[0].datetime).getDay()]
 
         let singleRunwayOperations = true;
+
+        let weekOffset = new Date().getWeekNumber();
+        
 
         for(let forecast of data.data) {
             let date = new Date(forecast.datetime);
@@ -91,9 +95,13 @@ export default {
                 this.current.arrival.runway = (runways.arrivals[isAfter3] == "09L" || runways.arrivals[isAfter3] == "27R") ? "north" : "south";
                 this.current.departure.runway = (runways.departures[isAfter3] == "09L" || runways.departures[isAfter3] == "27R") ? "north" : "south";
             }
-
-            this.forecasts.push({date: date.getDate() + "/" + months[date.getMonth()], easterly: easterly, runways: runways})
+            console.log("offset: " + (date.getWeekNumber()-weekOffset));
+            if(this.weeks[date.getWeekNumber()-weekOffset] == null) {
+                this.weeks[date.getWeekNumber()-weekOffset] = {forecasts:[], offset_days: 0, offset_days_post: 0}
+            }
+            this.weeks[date.getWeekNumber()-weekOffset].forecasts.push({date: date.getDate() + "/" + months[date.getMonth()], easterly: easterly, runways: runways})
         }
+        this.weeks[this.weeks.length-1].offset_days_post = 7 - this.weeks[this.weeks.length-1].forecasts.length
     });
   }
 }
