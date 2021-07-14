@@ -31,8 +31,6 @@
                 <p>Aircraft must take off and land into the wind. If the wind is coming from the east, Heathrow switches to what is known as easterly operations and aircraft take off to the east (i.e. over London). Alternation does not take place on easterly operations as the taxiway infrastructure is insufficient. The infrastructure was not developed as a result of the Cranford Agreement, which whilst it has since expired, prevented aircraft from taking off over Cranford (i.e. 09L departures). Heathrow operates on a 'westerly preference'. This means that even if the wind is coming from the east, if the winds are light (less than 5kts, generally), Heathrow will continue to operate on westerly operations.</p>
             </div>
             <div class="col-lg-4">
-                <h3>Single Runway Operations</h3>
-                <p>As a result of drastically reduced flight schedules due to COVID-19, Heathrow is only using one runway for both arrivals and departures. The runway used alternates on a weekly basis. The westerly preference does not operate as part of single runway operations.</p>
                 <h3>More Info</h3>
                 Live updates: <a href="https://twitter.com/HeathrowNoise">@HeathrowNoise</a><br>
                 More information: <a href="https://www.heathrow.com/company/local-community/noise/operations">heathrow.com</a>
@@ -80,10 +78,10 @@ export default {
             let easterly = forecast.wind_dir > 22.5 && forecast.wind_dir < 157.5 && forecast.wind_gust_spd >= 3;
             let runways = {};
             if(singleRunwayOperations) {
-                if(isEvenWeek && !easterly) runways = {departures: ["27R", "27R"], arrivals: ["27R", "27R"]};
-                if(isEvenWeek && easterly) runways = {departures: ["09L", "09L"], arrivals: ["09L", "09L"]};
-                if(!isEvenWeek && !easterly) runways = {departures: ["27L", "27L"], arrivals: ["27L", "27L"]};
-                if(!isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09R", "09R"]};
+                if(isEvenWeek && !easterly) runways = {departures: ["27R", "27L"], arrivals: ["27L", "27R"]};
+                if(isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
+                if(!isEvenWeek && !easterly) runways = {departures: ["27L", "27R"], arrivals: ["27R", "27L"]};
+                if(!isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
             }
 
             if(this.current.departure.direction == null) {
