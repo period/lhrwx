@@ -37,6 +37,13 @@
                 <h3>More Info</h3>
                 Live updates: <a href="https://twitter.com/HeathrowNoise">@HeathrowNoise</a><br>
                 More information: <a href="https://www.heathrow.com/company/local-community/noise/operations">heathrow.com</a>
+                <hr>
+                <h3>Credits</h3>
+                Website: <a href="https://thomas.gg">thomas.gg</a><br>
+                Hourly forecast data from the <a href="https://www.metoffice.gov.uk/weather/forecast/gcpsvg3nc">Met Office</a><br>
+                Daily forecast data from <a href="https://weatherbit.io">Weatherbit</a>
+                <hr>
+                Contains public sector information licensed under the Open Government Licence
             </div>
         </div>
     </div>
