@@ -6,9 +6,12 @@
         <hr>
     </div>
     <div class="container-fluid table-responsive">
+        <h1 class="text-center">Three Hourly Forecast</h1>
         <HourlyForecast :forecasts="hourlies" />
+        <p class="text-center">Heathrow's night schedule begins after the last departure. See bottom of page for further information on how it operates.</p>
     </div>
     <div class="container">
+        <h1 class="text-center">Daily Forecast</h1>
         <div class="row" v-if="window_width >= 1200">
             <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" class="col"><h3>{{ day }}</h3></div>
         </div>
@@ -25,15 +28,19 @@
     <div class="container">
         <hr>
         <div class="row">
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <h3>Runway Alternation</h3>
                 <p>At 3pm each day, the runway used for departures and landings alternates. This means that the runway used before 3pm for arrivals will become the runway used for departures. This alternates each week, so one week departures may be on the southern runway before 3pm with the next week having departures on the southern runway after 3pm. Runway alternation does not take place on easterly operations.</p>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <h3>Wind Direction</h3>
                 <p>Aircraft must take off and land into the wind. If the wind is coming from the east, Heathrow switches to what is known as easterly operations and aircraft take off to the east (i.e. over London). Alternation does not take place on easterly operations as the taxiway infrastructure is insufficient. The infrastructure was not developed as a result of the Cranford Agreement, which whilst it has since expired, prevented aircraft from taking off over Cranford (i.e. 09L departures). Heathrow operates on a 'westerly preference'. This means that even if the wind is coming from the east, if the winds are light (less than 5kts, generally), Heathrow will continue to operate on westerly operations.</p>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-3">
+                <h3>Night Time</h3>
+                <p>After the last departure until 6am the following day, Heathrow follows a separate 4-week alternation schedule. It can be difficult to predict in advance which runway will be used. Follow the Twitter account/consult the Heathrow website for further information.</p>
+            </div>
+            <div class="col-lg-3">
                 <h3>More Info</h3>
                 Live updates: <a href="https://twitter.com/HeathrowNoise">@HeathrowNoise</a><br>
                 More information: <a href="https://www.heathrow.com/company/local-community/noise/operations">heathrow.com</a>
@@ -43,9 +50,10 @@
                 Hourly forecast data from the <a href="https://www.metoffice.gov.uk/weather/forecast/gcpsvg3nc">Met Office</a><br>
                 Daily forecast data from <a href="https://weatherbit.io">Weatherbit</a>
                 <hr>
-                Contains public sector information licensed under the Open Government Licence
+                Contains public sector information licensed under the Open Government Licence. 
             </div>
         </div>
+        <small>Just a bit of fun: use this website for guidance. Actual runway use can vary based on different factors, and as such no representation is made as to the accuracy or completeness of any of the information contained herein and no liability is accepted for any loss arising from the use of the information provided.</small>
     </div>
   </div>
 </template>
