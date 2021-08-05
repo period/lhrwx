@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "bootstrap": "^4.6.0",
+    "compass-direction-to-heading": "^1.0.3",
     "vue": "^2.6.11"
   },
   "devDependencies": {

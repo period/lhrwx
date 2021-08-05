@@ -5,6 +5,9 @@
         <h6>Heathrow should currently be taking off from the {{ current.departure.runway }}ern runway heading towards {{ current.departure.direction }} and landing on the {{ current.arrival.runway }}ern runway over {{ current.arrival.direction }}</h6>
         <hr>
     </div>
+    <div class="container-fluid">
+        <HourlyForecast :forecasts="hourlies" />
+    </div>
     <div class="container">
         <div class="row">
             <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" class="col"><h3>{{ day }}</h3></div>
@@ -41,14 +44,36 @@
 </template>
 <script>
 import "bootstrap/dist/css/bootstrap.min.css"
+import compassToHeading from "compass-direction-to-heading"
+import HourlyForecast from "./components/HourlyForecast.vue"
 export default {
     name: "App",
     components: {
+        HourlyForecast
     },
     data: function() {
         return {
             weeks: [{forecasts:[],offset_days:0,offset_days_post:0}],
+            hourlies: [],
             current: {departure: {}, arrival: {}}
+        }
+    },
+    methods: {
+        determineRunway(date, speed, direction) {
+            let isEasterly = direction > 22.5 && direction < 157.5 && speed >= 5;
+            let isEvenWeek = (date.getWeekNumber() % 2 == 0);
+            let isAfter3 = date.toLocaleString("en-GB", {hour: "2-digit", hour12: false, timeZone: "Europe/London"}) >= 15;
+
+            /* Daytime runway ops */
+            if(isEasterly) return {departure: "09R", arrival: "09L"};
+            if(isAfter3) {
+                if(isEvenWeek) return {departure: "27L", arrival: "27R"}
+                else return {departure: "27R", arrival: "27L"};
+            }
+            else {
+                if(isEvenWeek) return {departure: "27R", arrival: "27L"}
+                else return {departure: "27L", arrival: "27R"};
+            }
         }
     },
     mounted() {
@@ -59,6 +84,25 @@ export default {
             let yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
             return Math.ceil((((d - yearStart) / 86400000) + 1)/7)
         };
+
+        // Pad forecasts out with 3-hourly forecast from the Met Office
+        fetch("https://lhrwx.thomas.gg/forecast.json").then(response => response.json()).then(data => {
+            for(let day of data.SiteRep.DV.Location.Period) {
+                let endHour = 24;
+                let threeHourlyForecast = [];
+                for(let i = day.Rep.length-1; i >= 0; i--) { // Because Met Office forecast doesn't give the hours, we have to calculate it ourselves. Best to just work backwards...
+                    let startHour = endHour - 3;
+                    // Now parse the data from the Met Office into something a bit more useful and then add it to the beginning of the three hourly forecast array for the day's forecast
+                    let forecast = {start: startHour, end: endHour, wind_direction: compassToHeading(day.Rep[i].D), wind_speed: day.Rep[i].S/1.151, wind_gust: day.Rep[i].G/1.151};
+                    forecast.runway = this.determineRunway(new Date(new Date(day.value).setHours(startHour)), forecast.wind_speed, forecast.wind_direction)
+                    threeHourlyForecast.unshift(forecast);
+                    //console.log(day.value + " -> " + week + " -> " + this.weeks[week].forecasts);
+                    //console.log("Hour in " + day.value + " starts at " + startHour + " and ends at " + endHour + " -> " + JSON.stringify(day.Rep[i]));
+                    endHour = startHour;
+                }
+                this.hourlies.push({day: new Date(day.value), forecast: threeHourlyForecast, offset: 8-threeHourlyForecast.length});
+             }
+        });
 
         fetch("https://api.weatherbit.io/v2.0/forecast/daily?&city=London&country=UK&key=2e562a75b5934c92b46a0146ba921871").then(response => response.json()).then(data => {
             let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -92,12 +136,9 @@ export default {
                 if(this.weeks[date.getWeekNumber()-weekOffset] == null) {
                     this.weeks[date.getWeekNumber()-weekOffset] = {forecasts:[], offset_days: 0, offset_days_post: 0}
                 }
-                this.weeks[date.getWeekNumber()-weekOffset].forecasts.push({date: date.getDate() + "/" + months[date.getMonth()], easterly: easterly, runways: runways})
+                this.weeks[date.getWeekNumber()-weekOffset].forecasts.push({date: date.getDate() + "/" + months[date.getMonth()], metoffice_date: date.getFullYear() + "-" + (date.getMonth()+1).toString().padStart(2,"0") + "-" + date.getDate().toString().padStart(2,"0") + "Z", three_hourly: [], easterly: easterly, runways: runways})
             }
             this.weeks[this.weeks.length-1].offset_days_post = 7 - this.weeks[this.weeks.length-1].forecasts.length
-        });
-        fetch("https://lhrwx.thomas.gg/forecast.json").then(response => response.json()).then(data => {
-
         });
   }
 }
