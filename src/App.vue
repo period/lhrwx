@@ -5,21 +5,21 @@
         <h6>Heathrow should currently be taking off from the {{ current.departure.runway }}ern runway heading towards {{ current.departure.direction }} and landing on the {{ current.arrival.runway }}ern runway over {{ current.arrival.direction }}</h6>
         <hr>
     </div>
-    <div class="container-fluid">
+    <div class="container-fluid table-responsive">
         <HourlyForecast :forecasts="hourlies" />
     </div>
     <div class="container">
-        <div class="row">
+        <div class="row" v-if="window_width >= 1200">
             <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" class="col"><h3>{{ day }}</h3></div>
         </div>
         <div class="row" v-for="week in weeks">
-            <div v-for="index in week.offset_days" class="col"></div>
-            <div v-for="forecast in week.forecasts" class="col">
+            <div v-for="index in week.offset_days" v-if="window_width >= 1200" class="col-xl"></div>
+            <div v-for="forecast in week.forecasts" class="col-xl col-sm-6">
                 <h5 :style="(forecast.easterly ? 'color:green' : '')">{{ forecast.date }}</h5>
                 <p>Departures: {{ forecast.runways.departures[0] }}/{{ forecast.runways.departures[1] }}</p>
                 <p>Arrivals: {{ forecast.runways.arrivals[0] }}/{{ forecast.runways.arrivals[1] }}</p>
             </div>
-            <div v-for="index in week.offset_days_post" class="col"></div>
+            <div v-for="index in week.offset_days_post" v-if="window_width >= 1200" class="col-xl"></div>
         </div>
     </div>
     <div class="container">
@@ -46,19 +46,30 @@
 import "bootstrap/dist/css/bootstrap.min.css"
 import compassToHeading from "compass-direction-to-heading"
 import HourlyForecast from "./components/HourlyForecast.vue"
+
 export default {
     name: "App",
     components: {
         HourlyForecast
     },
+    created() {
+        window.addEventListener("resize", this.resizeWindow);
+    },
+    destroyed() {
+        window.removeEventListener("resize", this.resizeWindow);
+    },
     data: function() {
         return {
             weeks: [{forecasts:[],offset_days:0,offset_days_post:0}],
             hourlies: [],
-            current: {departure: {}, arrival: {}}
+            current: {departure: {}, arrival: {}},
+            window_width: 0
         }
     },
     methods: {
+        resizeWindow() {
+            this.window_width = window.innerWidth;
+        },
         determineRunway(date, speed, direction) {
             let isEasterly = direction > 22.5 && direction < 157.5 && speed >= 5;
             let isEvenWeek = (date.getWeekNumber() % 2 == 0);
@@ -77,6 +88,7 @@ export default {
         }
     },
     mounted() {
+        this.window_width = window.innerWidth;
         Date.prototype.getWeekNumber = function(){
             let d = new Date(Date.UTC(this.getFullYear(), this.getMonth(), this.getDate()));
             let dayNum = d.getUTCDay() || 7;
@@ -132,7 +144,6 @@ export default {
                     this.current.arrival.runway = (runways.arrivals[isAfter3] == "09L" || runways.arrivals[isAfter3] == "27R") ? "north" : "south";
                     this.current.departure.runway = (runways.departures[isAfter3] == "09L" || runways.departures[isAfter3] == "27R") ? "north" : "south";
                 }
-                console.log("offset: " + (date.getWeekNumber()-weekOffset));
                 if(this.weeks[date.getWeekNumber()-weekOffset] == null) {
                     this.weeks[date.getWeekNumber()-weekOffset] = {forecasts:[], offset_days: 0, offset_days_post: 0}
                 }
