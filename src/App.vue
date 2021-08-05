@@ -66,8 +66,6 @@ export default {
             let offsetMap = [6, 0, 1, 2, 3, 4, 5];
             this.weeks[0].offset_days = offsetMap[new Date(data.data[0].datetime).getDay()]
 
-            let singleRunwayOperations = true;
-
             let weekOffset = new Date().getWeekNumber();
             
 
@@ -76,12 +74,10 @@ export default {
                 let isEvenWeek = (date.getWeekNumber() % 2 == 0);
                 let easterly = forecast.wind_dir > 22.5 && forecast.wind_dir < 157.5 && forecast.wind_gust_spd >= 3;
                 let runways = {};
-                if(singleRunwayOperations) {
-                    if(isEvenWeek && !easterly) runways = {departures: ["27R", "27L"], arrivals: ["27L", "27R"]};
-                    if(isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
-                    if(!isEvenWeek && !easterly) runways = {departures: ["27L", "27R"], arrivals: ["27R", "27L"]};
-                    if(!isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
-                }
+                if(isEvenWeek && !easterly) runways = {departures: ["27R", "27L"], arrivals: ["27L", "27R"]};
+                if(isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
+                if(!isEvenWeek && !easterly) runways = {departures: ["27L", "27R"], arrivals: ["27R", "27L"]};
+                if(!isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
 
                 if(this.current.departure.direction == null) {
                     let isAfter3 = new Date().toLocaleString("en-GB", {hour: "2-digit", hour12: false, timeZone: "Europe/London"}) >= 15 ? 1 : 0;
