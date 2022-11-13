@@ -48,7 +48,7 @@
                 <h3>Credits</h3>
                 Website: <a href="https://thomas.gg">thomas.gg</a><br>
                 Hourly forecast data from the <a href="https://www.metoffice.gov.uk/weather/forecast/gcpsvg3nc">Met Office</a><br>
-                Daily forecast data from <a href="https://weatherbit.io">Weatherbit</a>
+                Daily forecast data sourced from a variety of providers
                 <hr>
                 Contains public sector information licensed under the Open Government Licence. 
             </div>
@@ -131,24 +131,26 @@ export default {
              }
         });
 
-        fetch("https://api.weatherbit.io/v2.0/forecast/daily?&city=London&country=UK&key=2e562a75b5934c92b46a0146ba921871").then(response => response.json()).then(data => {
+        fetch("https://lhrwx.thomas.gg/daily_forecast.json").then(response => response.json()).then(data => {
             let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
             let offsetMap = [6, 0, 1, 2, 3, 4, 5];
-            this.weeks[0].offset_days = offsetMap[new Date(data.data[0].datetime).getDay()]
+            this.weeks[0].offset_days = offsetMap[new Date(data[0].timestamp*1000).getDay()]
 
             let weekOffset = new Date().getWeekNumber();
             
 
-            for(let forecast of data.data) {
-                let date = new Date(forecast.datetime);
+            for(let forecast of data) {
+                let date = new Date(forecast.timestamp*1000);
                 let isEvenWeek = (date.getWeekNumber() % 2 == 0);
-                let easterly = forecast.wind_dir > 22.5 && forecast.wind_dir < 157.5 && forecast.wind_gust_spd >= 3;
+                let easterly = forecast.wind_direction > 22.5 && forecast.wind_direction < 157.5 && forecast.wind_speed >= 3;
                 let runways = {};
                 if(isEvenWeek && !easterly) runways = {departures: ["27R", "27L"], arrivals: ["27L", "27R"]};
                 if(isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
                 if(!isEvenWeek && !easterly) runways = {departures: ["27L", "27R"], arrivals: ["27R", "27L"]};
                 if(!isEvenWeek && easterly) runways = {departures: ["09R", "09R"], arrivals: ["09L", "09L"]};
+
+                console.log(forecast);
 
                 if(this.current.departure.direction == null) {
                     let isAfter3 = new Date().toLocaleString("en-GB", {hour: "2-digit", hour12: false, timeZone: "Europe/London"}) >= 15 ? 1 : 0;
