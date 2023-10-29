@@ -121,13 +121,13 @@ export default {
                     let startHour = endHour - 3;
                     // Now parse the data from the Met Office into something a bit more useful and then add it to the beginning of the three hourly forecast array for the day's forecast
                     let forecast = {start: startHour, end: endHour, wind_direction: compassToHeading(day.Rep[i].D), wind_speed: day.Rep[i].S/1.151, wind_gust: day.Rep[i].G/1.151};
-                    forecast.runway = this.determineRunway(new Date(new Date(day.value).setHours(startHour)), forecast.wind_speed, forecast.wind_direction)
+                    forecast.runway = this.determineRunway(new Date(new Date(day.value.replace("Z", "")).setHours(startHour)), forecast.wind_speed, forecast.wind_direction)
                     threeHourlyForecast.unshift(forecast);
                     //console.log(day.value + " -> " + week + " -> " + this.weeks[week].forecasts);
                     //console.log("Hour in " + day.value + " starts at " + startHour + " and ends at " + endHour + " -> " + JSON.stringify(day.Rep[i]));
                     endHour = startHour;
                 }
-                this.hourlies.push({day: new Date(day.value), forecast: threeHourlyForecast, offset: 8-threeHourlyForecast.length});
+                this.hourlies.push({day: new Date(day.value.replace("Z", "")), forecast: threeHourlyForecast, offset: 8-threeHourlyForecast.length});
              }
         });
 
